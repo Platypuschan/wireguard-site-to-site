@@ -1,38 +1,5 @@
 # Wireguard Site-to-Site VPN
 
-This guide will show you how to connect two (or more) networks (not just clients) to each other via standard Linux machines and Wireguard VPN.
-
-The goal of this guide is to:
-
-1. Allow additional clients on the same private subnet as the connecting client to reach the private network of the Wireguard server
-2. Allow clients connecting to the Wireguard server outside of the private network access to other clients private networks and the Wireguard private network
-
-**IMPORTANT:** This does not address ACLs/Security groups to lock down the traffic that flows between the sites. Make sure you address this accordingly with iptables or another solution.
-
-## Installation of Wireguard:
-
-I have installed Wireguard the following 3 ways when testing this configuration:
-
-1. Official Wireguard Install documentation: https://www.wireguard.com/install/ and https://www.wireguard.com/quickstart/
-2. Complex Organizations - Wireguard Installer Manager: https://github.com/complexorganizations/wireguard-installer-manager
-3. LNS - Wireguard Install: https://github.com/l-n-s/wireguard-install
-
-For simplicity sake and if you are new to Wireguard, I recommend using **Option #3** to install Wireguard on your server.
-
-## Securing The Server
-
-If you are installing this on a virtual private server on Digital Ocean, AWS or Linode, use an appropriate firewall or IPtables configuration to secure the server.
-
-I use Digital Ocean and on the Digital Ocean firewall, I only open UDP on the port the Wireguard server is listening on to all IP addresses. I lock down SSH to my home or office IP to reduce the likelihood of an attacker gaining access to the system.
-
-See the `ListenPort` in the /etc/wireguard/wg0.conf file to know what port you server is listening on.
-
-```
-[Interface]
-Address = 10.9.0.1/24
-ListenPort = 31030
-```
-
 ## Server Configuration
 
 The server file created during the setup will have the basics you need to get connected from a WG Client to the WG Server.
@@ -111,8 +78,8 @@ PrivateKey = PRIVATE_KEY
 Address = 10.9.0.2/24
 DNS = 1.1.1.1, 1.0.0.1
 
-PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o INTERNAL_IP_INTERFACE -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o INTERNAL_IP_INTERFACE -j MASQUERADE
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth1 -j MASQUERADE
 
 [Peer]
 PublicKey = PUBLIC_KEY
